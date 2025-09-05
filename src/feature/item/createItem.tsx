@@ -29,7 +29,7 @@ export const CreateItemDrawer = ({onCreation, isOpen, onClose }: CreateItemDrawe
 
   const createItemSchema = z.object({
     name: z.string().min(1, "Введите название"),
-    photoUrl: z.string().optional().nullable(),
+    photoUrl: z.string().optional(),
     inventoryNumber: z.string().min(1, "Введите инвентарный номер"),
     quantity: z.number(),
   });
