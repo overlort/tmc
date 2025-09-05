@@ -17,6 +17,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import { CreateItem } from "@/entities/item/model/item.types";
 
 interface CreateItemDrawerProps {
   isOpen: boolean;
@@ -33,9 +34,9 @@ export const CreateItemDrawer = ({onCreation, isOpen, onClose }: CreateItemDrawe
     quantity: z.number(),
   });
 
-  type CreateItem = z.infer<typeof createItemSchema>;
+  type CreateItemSchema = z.infer<typeof createItemSchema>;
 
-  const form = useForm<CreateItem>({
+  const form = useForm<CreateItemSchema>({
     resolver: zodResolver(createItemSchema),
     defaultValues: {
       name: "",
@@ -44,24 +45,26 @@ export const CreateItemDrawer = ({onCreation, isOpen, onClose }: CreateItemDrawe
       quantity: 0,
     },
   });
-  const handleCreateItem = async (data: any) => {
+  const handleCreateItem = async (data: Omit<CreateItem, "status">) => {
     console.log(data)
-    const createData = {
+    const createData: CreateItem = {
       name: data.name,
       photoUrl: data.photoUrl,
       inventoryNumber: data.inventoryNumber,
       quantity: data.quantity,
       status: "IN_STOCK"
     }
+
     try {
 
-      const newProduct = await createItem(createData);
+      await createItem(createData);
       form.reset()
       onCreation();
       toast("Успешно создано" +
         "");
     } catch (err) {
       toast("Ошибка при создании товара");
+      console.error(err);
     } finally {
     }
   };
