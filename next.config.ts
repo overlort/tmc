@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    remotePatterns: [new URL('https://img-webcalypt.ru/img/thumb/lg/images/meme-templates/7662012bb4b0acd4e1d2240f3dc7250b.jpg.jpg')],
+    remotePatterns: [new URL('https://res.cloudinary.com/dwoakn183/image/**')],
   },
 };
 

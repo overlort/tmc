@@ -1,3 +1,5 @@
+import { Item } from "@prisma/client";
+
 export interface IOrder {
   id: number;
   createdAt: Date;
@@ -6,5 +8,13 @@ export interface IOrder {
   comment?: string | null;
   itemName: string;
   quantity: number;
-  analogLinks?: string | null;
+  items?: Item[] | null;
+}
+export interface CreateOrder {
+  dueDate?: Date | null;
+  initiator: string;
+  comment?: string | null;
+  itemName: string;
+  quantity: number;
+  items?: Item[];
 }

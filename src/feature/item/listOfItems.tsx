@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { hM } from "@/lib/highlightMatches";
 
 interface ListOfItemsProps {
   search: string;
@@ -25,14 +26,6 @@ export default function ListOfItems ({items, search }: ListOfItemsProps){
     }
   };
 
-  if (!items.length) {
-    return (
-      <div className="py-10 flex justify-center">
-        <div>Товары не найдены</div>
-      </div>
-    );
-  }
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {items.map((item) => (
@@ -40,8 +33,8 @@ export default function ListOfItems ({items, search }: ListOfItemsProps){
           {item.photoUrl ? (
             <div className="relative w-full h-48">
               <Image
-                // src={item.photoUrl}
-                src={"https://img-webcalypt.ru/img/thumb/lg/images/meme-templates/7662012bb4b0acd4e1d2240f3dc7250b.jpg.jpg"}
+                src={item.photoUrl}
+                // src={"https://img-webcalypt.ru/img/thumb/lg/images/meme-templates/7662012bb4b0acd4e1d2240f3dc7250b.jpg.jpg"}
                 alt={item.name}
                 fill
                 style={{ objectFit: "cover" }}
@@ -55,9 +48,9 @@ export default function ListOfItems ({items, search }: ListOfItemsProps){
 
           <CardContent className="p-4 flex flex-col flex-1">
             <CardHeader className="mb-2">
-              <div className="font-bold">{item.name}</div>
+              <div className="font-bold">{hM(item.name, search)}</div>
             </CardHeader>
-            <div>Инв. номер: {item.inventoryNumber}</div>
+            <div>Инв. номер: {hM(item.inventoryNumber, search)}</div>
             <div>Количество: {item.quantity}</div>
             <div className="mt-2">{getStatusBadge(item.status)}</div>
           </CardContent>

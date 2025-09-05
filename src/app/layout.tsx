@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import Link from "next/link";
 
 
 const geistSans = Geist({
@@ -29,6 +30,23 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+      <header className="w-full bg-white shadow-sm p-4 flex items-center justify-between">
+        {/* Левый логотип */}
+        <div className="text-2xl font-bold">ТМЦ</div>
+
+        {/* Центр - навигация */}
+        <nav className="flex gap-6 mx-auto">
+          <Link href="/" className="hover:underline">
+            Товары
+          </Link>
+          <Link href="/order" className="hover:underline">
+            Заявки
+          </Link>
+        </nav>
+
+        {/* Справа пока пусто */}
+        <div style={{ width: "100px" }}></div>
+      </header>
       {children}
       <Toaster />
       </body>

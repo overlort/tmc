@@ -1,11 +1,20 @@
+"use server"
+
 import { PrismaClient } from "@prisma/client";
-import {IOrder} from "@/entities/order/model/order.types";
+import { CreateOrder, IOrder } from "@/entities/order/model/order.types";
 
 const prisma = new PrismaClient();
 
 // CREATE
-export async function createOrder(data: Omit<IOrder, "id" | "createdAt">): Promise<IOrder> {
-  return prisma.order.create({ data });
+export async function createOrder(data: CreateOrder): Promise<IOrder> {
+  return prisma.order.create({
+    data: {
+      dueDate: data.dueDate,
+      initiator: data.initiator,
+      comment: data.comment,
+      itemName: data.itemName,
+      quantity: data.quantity,
+    }});
 }
 
 // READ (один)
@@ -21,9 +30,15 @@ export async function getAllOrders(): Promise<IOrder[]> {
 // UPDATE
 export async function updateOrder(
   id: number,
-  data: Partial<Omit<IOrder, "id" | "createdAt">>
+  data: CreateOrder
 ): Promise<IOrder> {
-  return prisma.order.update({ where: { id }, data });
+  return prisma.order.update({ where: { id }, data: {
+      dueDate: data.dueDate,
+      initiator: data.initiator,
+      comment: data.comment,
+      itemName: data.itemName,
+      quantity: data.quantity,
+    } });
 }
 
 // DELETE

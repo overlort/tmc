@@ -8,30 +8,29 @@ datasource db {
 }
 
 model Item {
-  id              Int      @id @default(autoincrement())
+  id              Int        @id @default(autoincrement())
   name            String
-  photoUrl        String?       // ссылка на фото (опционально)
-  inventoryNumber String        @unique
+  photoUrl        String?
+  inventoryNumber String     @unique
   quantity        Int
-  status          ItemStatus    // выдан, на складе, нет в наличии
+  status          ItemStatus
   orderId         Int?
-  order           Order?        @relation(fields: [orderId], references: [id])
+  order           Order?     @relation(fields: [orderId], references: [id])
 }
 
 model Order {
-  id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now())  // дата оформления
-  dueDate     DateTime?                 // время исполнения
-  initiator   String                    // инициатор (кто заказал)
-  comment     String?                   // комментарий
-  itemName    String                    // название (заказа/позиции)
-  quantity    Int                       // количество
-  items       Item[]
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  dueDate   DateTime?
+  initiator String
+  comment   String?
+  itemName  String
+  quantity  Int
+  items     Item[]
 }
 
 enum ItemStatus {
-  IN_STOCK     // на складе
-  ISSUED       // выдан
-  NOT_AVAILABLE // нет в наличии
+  IN_STOCK
+  ISSUED
+  NOT_AVAILABLE
 }
-

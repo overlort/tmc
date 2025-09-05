@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,6 @@ import { createItem } from "@/entities/item/model/item.action";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import {
   Form,
   FormField,
@@ -18,6 +17,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { CreateItem } from "@/entities/item/model/item.types";
+import { useState } from "react";
+import Image from "next/image";
 
 interface CreateItemDrawerProps {
   isOpen: boolean;
@@ -25,7 +26,9 @@ interface CreateItemDrawerProps {
   onCreation: () => void;
 }
 
-export const CreateItemDrawer = ({onCreation, isOpen, onClose }: CreateItemDrawerProps) => {
+export const CreateItemDrawer = ({ onCreation, isOpen, onClose }: CreateItemDrawerProps) => {
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const createItemSchema = z.object({
     name: z.string().min(1, "Введите название"),
@@ -45,33 +48,65 @@ export const CreateItemDrawer = ({onCreation, isOpen, onClose }: CreateItemDrawe
       quantity: 0,
     },
   });
+
   const handleCreateItem = async (data: Omit<CreateItem, "status">) => {
-    console.log(data)
-    const createData: CreateItem = {
-      name: data.name,
-      photoUrl: data.photoUrl,
-      inventoryNumber: data.inventoryNumber,
-      quantity: data.quantity,
-      status: "IN_STOCK"
+    try {
+      console.log("url of photo", form.getValues("photoUrl"))
+      console.log({data})
+      const createData: CreateItem = {
+        ...data,
+        status: "IN_STOCK",
+      };
+      await createItem(createData);
+      form.reset();
+      setPreviewUrl(null); // сбрасываем превью
+      onCreation();
+      toast("✅ Успешно создано");
+    } catch (err) {
+      console.error(err);
+      toast("❌ Ошибка при создании товара");
     }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Сначала показываем превью
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Загружаем на Cloudinary
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "items_photo"); // замените на свой
 
     try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/dwoakn183/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      console.log({res})
 
-      await createItem(createData);
-      form.reset()
-      onCreation();
-      toast("Успешно создано" +
-        "");
+      const data = await res.json();
+      form.setValue("photoUrl", data.secure_url);
+      console.log({photo: data?.secure_url, previewUrl})
+      toast("Фото загружено ✅");
     } catch (err) {
-      toast("Ошибка при создании товара");
       console.error(err);
+      toast("Ошибка при загрузке фото ❌");
     } finally {
+      setUploading(false);
     }
   };
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()} direction="right">
-      <DrawerContent className=" p-4 w-full sm:w-1/3">
+      <DrawerContent className="p-4 w-full sm:w-1/3">
         <DrawerHeader>
           <div className="flex justify-between items-center">
             <DrawerTitle>Создать новый товар</DrawerTitle>
@@ -80,8 +115,8 @@ export const CreateItemDrawer = ({onCreation, isOpen, onClose }: CreateItemDrawe
         </DrawerHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleCreateItem)} className="space-y-8">
-            {/* Name */}
+          <form onSubmit={form.handleSubmit(handleCreateItem)} className="space-y-6">
+            {/* Название */}
             <FormField
               control={form.control}
               name="name"
@@ -96,22 +131,30 @@ export const CreateItemDrawer = ({onCreation, isOpen, onClose }: CreateItemDrawe
               )}
             />
 
-            {/* Photo URL */}
+            {/* Фото */}
             <FormField
               control={form.control}
               name="photoUrl"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
-                  <FormLabel>Ссылка на фото</FormLabel>
+                  <FormLabel>Фото товара</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ведите" {...field} />
+                    <div>
+                      <Input type="file" accept="image/*" onChange={handleFileChange} />
+                      {previewUrl && (
+                        <div className="mt-2 w-full h-48 relative border border-gray-200">
+                          <Image src={previewUrl} alt="Preview" fill style={{ objectFit: "cover" }} />
+                        </div>
+                      )}
+                      {uploading && <p className="text-sm text-gray-500 mt-1">Загрузка...</p>}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Inventory Number */}
+            {/* Инвентарный номер */}
             <FormField
               control={form.control}
               name="inventoryNumber"
@@ -126,25 +169,24 @@ export const CreateItemDrawer = ({onCreation, isOpen, onClose }: CreateItemDrawe
               )}
             />
 
-            {/* Quantity */}
+            {/* Количество */}
             <FormField
               control={form.control}
               name="quantity"
-              render={({ field }) => {
-                console.log(field)
-                return (
-                  <FormItem>
-                    <FormLabel>Количество</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} onChange={(e) => field.onChange(e.target.valueAsNumber)}/>
-                    </FormControl>
-                    <FormMessage/>
-                  </FormItem>
-                )
-              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Количество</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
 
-            <Button type="submit">Создать предмет</Button>
+            <Button type="submit" disabled={uploading}>
+              {uploading ? "Загрузка..." : "Создать предмет"}
+            </Button>
           </form>
         </Form>
       </DrawerContent>
