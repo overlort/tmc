@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Item {
+  id              Int      @id @default(autoincrement())
+  name            String
+  photoUrl        String?       // ссылка на фото (опционально)
+  inventoryNumber String        @unique
+  quantity        Int
+  status          ItemStatus    // выдан, на складе, нет в наличии
+  orderId         Int?
+  order           Order?        @relation(fields: [orderId], references: [id])
+}
+
+model Order {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())  // дата оформления
+  dueDate     DateTime?                 // время исполнения
+  initiator   String                    // инициатор (кто заказал)
+  comment     String?                   // комментарий
+  itemName    String                    // название (заказа/позиции)
+  quantity    Int                       // количество
+  items       Item[]
+}
+
+enum ItemStatus {
+  IN_STOCK     // на складе
+  ISSUED       // выдан
+  NOT_AVAILABLE // нет в наличии
+}
+
