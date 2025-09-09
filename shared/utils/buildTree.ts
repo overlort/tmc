@@ -1,10 +1,10 @@
-import { ICategory  } from "@/entities/category/model/category.types";
+import { CategoryNode, ICategory } from "@/entities/category/model/category.types";
 
 export function buildTree(rows: ICategory []) {
-  const map = new Map<string, CategoryRow & { children: any[] }>();
+  const map = new Map<string, CategoryNode>();
   rows.forEach((r) => map.set(r.id, { ...r, children: [] }));
 
-  const roots: Array<CategoryRow & { children: any[] }> = [];
+  const roots: Array<CategoryNode> = [];
   map.forEach((node) => {
     if (node.parentId) {
       const p = map.get(node.parentId);
@@ -16,7 +16,7 @@ export function buildTree(rows: ICategory []) {
   });
 
   // по желанию можно отсортировать children по name
-  const sortRec = (arr: any[]) => {
+  const sortRec = (arr: CategoryNode[]) => {
     arr.sort((a, b) => a.name.localeCompare(b.name));
     arr.forEach((c) => c.children && sortRec(c.children));
   };
