@@ -1,27 +1,25 @@
 
 import { Category } from "@prisma/client";
+import { IIncome } from "@/entities/income/model/income.type";
 
-export type Statuses = "IN_STOCK" | "ISSUED" | "NOT_AVAILABLE";
+// export type Statuses = "IN_STOCK" | "ISSUED" | "NOT_AVAILABLE";
 
 export interface IItem {
   id: number;
   name: string;
   photoUrl?: string | null;
-  inventoryNumber: string;
+  inventoryNumber: string | null;
   quantity: number;
-  status: Statuses;
-  categoryId?: string;
-  category?: Category
-  // orderId?: number | null;
-  // order?: IOrder;
+  categoryId: string | null;
+  incomeId: number | null;
 }
 
 export interface CreateItem {
   name: string;
-  photoUrl?: string | null;
-  inventoryNumber: string;
+  photoUrl?: string;
+  inventoryNumber?: string;
   quantity: number;
-  status: Statuses;
+  incomeId?: number;
 }
 
 export interface ItemForm {
@@ -29,4 +27,11 @@ export interface ItemForm {
   quantity: number;
   price: number;
   code: string;
+}
+
+export interface ItemWithCategory extends IItem {
+  category: Category | null;
+}
+export interface ItemWithIncome extends IItem {
+  income: IIncome | null;
 }

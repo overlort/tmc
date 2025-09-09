@@ -14,6 +14,7 @@ export interface CreateIncome {
   creatorName: string;
   incomeNumber: string;
   incomeDate: Date;
+  photoUrl: string;
   seller: string;
   buyer: string;
 }
@@ -23,6 +24,7 @@ export interface CreateIncomeForm {
   incomeNumber: string;
   incomeDate: string;
   seller: string;
+  photoUrl: string;
   buyer: string;
   items: ItemForm[];
 }

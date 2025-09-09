@@ -1,10 +1,27 @@
 'use server';
 
-import { CreateIncome, IIncome } from "@/entities/income/model/income.type";
+import { CreateIncomeForm, IIncome } from "@/entities/income/model/income.type";
 import { prisma } from "../../../../shared/lib/prisma";
 
-export const createIncome = async (data: CreateIncome): Promise<IIncome> =>
-  await prisma.income.create({ data });
+export const createIncomeWithItems = async (data: CreateIncomeForm) => {
+  await prisma.$transaction(async (tx) => {
+    const { items, ...creationData } = data
+    const { id } = await prisma.income.create({
+      data: {
+        ...creationData,
+        incomeDate: new Date(creationData.incomeDate)
+      }
+    });
+
+    await tx.item.createMany({
+      data: items.map((i) => ({
+        incomeId: id,
+        name: i.name,
+        quantity: i.quantity,
+      }))
+    })
+  })
+}
 
 // READ (один)
 export const getIncomeById = async (id: number): Promise<IIncome | null> =>

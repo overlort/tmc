@@ -12,11 +12,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import { PlusCircle } from "lucide-react";
+import { Loader2Icon, PlusCircle } from "lucide-react";
 import { ItemFields } from "@/feature/income/itemFields";
 import { Input } from "@/components/ui/input";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { CreateIncomeForm } from "@/entities/income/model/income.type";
+import Image from "next/image";
+import { createIncomeWithItems } from "@/entities/income/model/income.action";
 
 interface CreateIncomeModalProps {
   isOpen: boolean;
@@ -25,6 +27,10 @@ interface CreateIncomeModalProps {
 }
 
 export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeModalProps) => {
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false)
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -41,6 +47,7 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
     incomeDate: z.string().min(1, "Укажите дату"),
     seller: z.string().min(1, "Введите продавца"),
     buyer: z.string().min(1, "Введите покупателя"),
+    photoUrl: z.string(),
     items: z.array(
       z.object({
         name: z.string().min(1),
@@ -57,11 +64,46 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
       creatorName: "",
       incomeNumber: "",
       incomeDate: "",
+      photoUrl: "",
       seller: "",
       buyer: "",
       items: [],
     },
   });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Сначала показываем превью
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Загружаем на Cloudinary
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "items_photo"); // замените на свой
+
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/dwoakn183/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      form.setValue("photoUrl", data.secure_url);
+      toast("Фото загружено ✅");
+    } catch (err) {
+      console.error(err);
+      toast("Ошибка при загрузке фото ❌");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -76,14 +118,26 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
   );
 
   const handleCreateIncome = async (data: CreateIncomeForm) => {
+    if (data.items.length === 0) {
+      throw new Error("Нельзя создать коробку без вещей");
+    }
     try {
+      setLoading(true)
+      console.log(1211113)
       console.log("Создаём счёт:", data);
+      await createIncomeWithItems(data);
+
       toast("✅ Счёт успешно создан");
+
       form.reset();
+      setPreviewUrl(null);
+      onClose()
       if (onCreation) onCreation();
     } catch (err) {
       console.error(err);
       toast("❌ Ошибка при создании счёта");
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -131,7 +185,7 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
                 <FormItem>
                   <FormLabel>Номер счёта</FormLabel>
                   <FormControl>
-                    <Input placeholder="Например: INV-001" {...field} autoComplete="off"/>
+                    <Input placeholder="Введите номер счета" {...field} autoComplete="off"/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -180,6 +234,28 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="photoUrl"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Фото товара</FormLabel>
+                  <FormControl>
+                    <div>
+                      <Input type="file" accept="image/*" onChange={handleFileChange} />
+                      {previewUrl && (
+                        <div className="mt-2 w-full h-48 relative border border-gray-200">
+                          <Image src={previewUrl} alt="Preview" fill style={{ objectFit: "cover" }} />
+                        </div>
+                      )}
+                      {uploading && <p className="text-sm text-gray-500 mt-1">Загрузка...</p>}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {/* Зона товаров */}
             <div className="border border-gray-300 rounded p-4 mt-4">
               <div className="flex justify-between items-center mb-2">
@@ -216,9 +292,15 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
 
             </div>
 
-            <button type="submit" className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
-              Создать счёт
-            </button>
+            {!loading ? (
+              <button type="submit" className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
+                Создать счёт
+              </button>) : (
+              <button type="submit" disabled={true} className=" flex flex-row gap-2 mt-4 bg-gray-500 text-white px-4 py-2 rounded">
+                <Loader2Icon className="animate-spin" />
+                Сохранение
+              </button>
+              )}
           </form>
         </Form>
       </div>

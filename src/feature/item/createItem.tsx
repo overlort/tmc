@@ -49,15 +49,9 @@ export const CreateItemDrawer = ({ onCreation, isOpen, onClose }: CreateItemDraw
     },
   });
 
-  const handleCreateItem = async (data: Omit<CreateItem, "status">) => {
+  const handleCreateItem = async (data: CreateItem) => {
     try {
-      console.log("url of photo", form.getValues("photoUrl"))
-      console.log({data})
-      const createData: CreateItem = {
-        ...data,
-        status: "IN_STOCK",
-      };
-      await createItem(createData);
+      await createItem(data);
       form.reset();
       setPreviewUrl(null); // сбрасываем превью
       onCreation();
@@ -90,8 +84,6 @@ export const CreateItemDrawer = ({ onCreation, isOpen, onClose }: CreateItemDraw
         method: "POST",
         body: formData,
       });
-      console.log({res})
-
       const data = await res.json();
       form.setValue("photoUrl", data.secure_url);
       console.log({photo: data?.secure_url, previewUrl})

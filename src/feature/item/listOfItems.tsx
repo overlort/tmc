@@ -3,7 +3,6 @@ import { IItem } from "@/entities/item/model/item.types";
 import Image from "next/image";
 
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { hM } from "@/lib/highlightMatches";
 
 interface ListOfItemsProps {
@@ -13,18 +12,18 @@ interface ListOfItemsProps {
 
 export default function ListOfItems ({items, search }: ListOfItemsProps){
 
-  const getStatusBadge = (status: IItem["status"]) => {
-    switch (status) {
-      case "IN_STOCK":
-        return <Badge variant="outline" color="green">На складе</Badge>;
-      case "ISSUED":
-        return <Badge variant="outline" color="blue">Выдан</Badge>;
-      case "NOT_AVAILABLE":
-        return <Badge variant="outline" color="red">Нет в наличии</Badge>;
-      default:
-        return null;
-    }
-  };
+  // const getStatusBadge = (status: IItem["status"]) => {
+  //   switch (status) {
+  //     case "IN_STOCK":
+  //       return <Badge variant="outline" color="green">На складе</Badge>;
+  //     case "ISSUED":
+  //       return <Badge variant="outline" color="blue">Выдан</Badge>;
+  //     case "NOT_AVAILABLE":
+  //       return <Badge variant="outline" color="red">Нет в наличии</Badge>;
+  //     default:
+  //       return null;
+  //   }
+  // };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -50,9 +49,9 @@ export default function ListOfItems ({items, search }: ListOfItemsProps){
             <CardHeader className="mb-2">
               <div className="font-bold">{hM(item.name, search)}</div>
             </CardHeader>
-            <div>Инв. номер: {hM(item.inventoryNumber, search)}</div>
+            <div>Инв. номер: {hM(item?.inventoryNumber ?? '', search)}</div>
             <div>Количество: {item.quantity}</div>
-            <div className="mt-2">{getStatusBadge(item.status)}</div>
+            {/*<div className="mt-2">{getStatusBadge(item.status)}</div>*/}
           </CardContent>
         </Card>
       ))}

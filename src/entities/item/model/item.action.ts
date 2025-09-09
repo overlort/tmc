@@ -17,11 +17,11 @@ export const getAllItems = async (): Promise<IItem[]> =>
   await prisma.item.findMany();
 
 // UPDATE
-export const updateItem = async (
-  id: number,
-  data: Partial<Omit<IItem, "id">>
-): Promise<IItem> =>
-  await prisma.item.update({ where: { id }, data });
+// export const updateItem = async (
+//   id: number,
+//   data: Partial<Omit<IItem, "id">>
+// ): Promise<IItem> =>
+//   await prisma.item.update({ where: { id }, data });
 
 // DELETE
 export const deleteItem = async (id: number): Promise<IItem> =>

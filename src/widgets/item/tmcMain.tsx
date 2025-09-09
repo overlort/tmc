@@ -7,17 +7,17 @@ import ListOfItems from "@/feature/item/listOfItems";
 import { IItem } from "@/entities/item/model/item.types";
 import { getAllItems } from "@/entities/item/model/item.action";
 import { CreateItemDrawer } from "@/feature/item/createItem";
-import { CreateOrderDrawer } from "@/feature/order/createOrder";
+// import { CreateOrderDrawer } from "@/feature/order/createOrder";
 import CatalogTree from "@/feature/category/catalogTree";
 
 export default function TmcMain() {
   const [search, setSearch] = useState("");
   const [isOpenItem, setIsOpenItem] = useState(false);
-  const [isOpenOrder, setIsOpenOrder] = useState(false);
+  // const [isOpenOrder, setIsOpenOrder] = useState(false);
   const [items, setItems] = useState<IItem[]>([]);
   const [preFilledName, setPreFilledName] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-
+  console.log(preFilledName)
   useEffect(() => {
     const getData = async () => {
       const data = await getAllItems();
@@ -40,12 +40,12 @@ export default function TmcMain() {
 
   const openOrderDrawerWithSearch = () => {
     setPreFilledName(search);
-    setIsOpenOrder(true);
+    // setIsOpenOrder(true);
   };
 
   const filteredItems = items.filter((item) => {
     const matchesSearch =
-      item.inventoryNumber.includes(search) || item.name.toLowerCase().includes(search.toLowerCase());
+      item?.inventoryNumber?.includes(search) || item.name.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = !selectedCategoryId || item.categoryId === selectedCategoryId;
     return matchesSearch && matchesCategory;
   });
@@ -88,7 +88,7 @@ export default function TmcMain() {
 
           <CreateItemDrawer onCreation={onCreationItem} isOpen={isOpenItem} onClose={() => setIsOpenItem(false)} />
 
-          <CreateOrderDrawer isOpen={isOpenOrder} onClose={() => setIsOpenOrder(false)} preFilledItemName={preFilledName} />
+          {/*<CreateOrderDrawer isOpen={isOpenOrder} onClose={() => setIsOpenOrder(false)} preFilledItemName={preFilledName} />*/}
         </main>
       </div>
     </div>

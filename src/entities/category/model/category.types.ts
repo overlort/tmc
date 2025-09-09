@@ -9,11 +9,6 @@ export type ICategory  = {
   updatedAt: Date;
 };
 
-export interface ICategoryWithChildren extends ICategory {
-  children: ICategoryWithChildren[];
-}
-
-
 export interface ICategoryWithItems extends ICategory {
   items: IItem[];
 }

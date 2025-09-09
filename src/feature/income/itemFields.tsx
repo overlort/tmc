@@ -45,7 +45,7 @@ export const ItemFields = ({
             <FormItem>
               <FormLabel>Кол-во</FormLabel>
               <FormControl>
-                <Input type="number" {...field} autoComplete="off"/>
+                <Input type="number" {...field} autoComplete="off" onChange={(e) => field.onChange(e.target.valueAsNumber)}/>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -61,7 +61,7 @@ export const ItemFields = ({
             <FormItem>
               <FormLabel>Цена</FormLabel>
               <FormControl>
-                <Input type="number" {...field} autoComplete="off"/>
+                <Input type="number" {...field} autoComplete="off" onChange={(e) => field.onChange(e.target.valueAsNumber)}/>
               </FormControl>
               <FormMessage />
             </FormItem>
