@@ -29,5 +29,5 @@ export type CategoryNode = {
   name: string;
   icon?: string | null;
   parentId?: string | null;
-  children?: CategoryNode[];
+  children: CategoryNode[];
 };
