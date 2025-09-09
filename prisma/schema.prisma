@@ -7,17 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Item {
-  id              Int        @id @default(autoincrement())
-  name            String
-  photoUrl        String?
-  inventoryNumber String     @unique
-  quantity        Int
-  status          ItemStatus
-  orderId         Int?
-  order           Order?     @relation(fields: [orderId], references: [id])
-}
-
 model Order {
   id        Int       @id @default(autoincrement())
   createdAt DateTime  @default(now())
@@ -26,11 +15,42 @@ model Order {
   comment   String?
   itemName  String
   quantity  Int
-  items     Item[]
 }
 
-enum ItemStatus {
-  IN_STOCK
-  ISSUED
-  NOT_AVAILABLE
+model Category {
+  id       String     @id @default(cuid())
+  name     String
+  icon     String? // название иконки из lucide (например "Wrench", "Box" и т.д.)
+  parentId String?
+  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToCategory")
+  items    Item[] // связь с товарами
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Item {
+  id              Int       @id @default(autoincrement())
+  name            String
+  photoUrl        String?
+  inventoryNumber String
+  quantity        Int
+  category        Category? @relation(fields: [categoryId], references: [id])
+  categoryId      String?
+
+  income   Income? @relation(fields: [incomeId], references: [id])
+  incomeId Int?
+}
+
+model Income {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  creatorName  String
+  incomeNumber String   @unique
+  incomeDate   DateTime
+  seller       String
+  buyer        String
+  photoUrl     String
+  items        Item[]
 }

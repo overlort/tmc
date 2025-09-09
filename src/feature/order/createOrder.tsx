@@ -53,11 +53,11 @@ export const CreateOrderDrawer = ({ isOpen, onClose, preFilledItemName, refetchO
     if (preFilledItemName) {
       form.setValue("itemName", preFilledItemName);
     }
-  }, [preFilledItemName]);
+  }, [form, preFilledItemName]);
 
   const handleCreateOrder = async (data: CreateOrderSchema) => {
     try {
-      await createOrder({...data, items: undefined});
+      await createOrder({...data});
       form.reset({ quantity: 1 }); // сбрасываем форму, quantity по умолчанию = 1
       toast("✅ Заказ успешно создан");
       onClose();

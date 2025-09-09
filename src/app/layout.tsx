@@ -42,6 +42,9 @@ export default function RootLayout({
           <Link href="/order" className="hover:underline">
             Заявки
           </Link>
+          <Link href="/income" className="hover:underline">
+            Поступления
+          </Link>
         </nav>
 
         {/* Справа пока пусто */}

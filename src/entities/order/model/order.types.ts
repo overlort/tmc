@@ -1,4 +1,3 @@
-import { Item } from "@prisma/client";
 
 export interface IOrder {
   id: number;
@@ -8,7 +7,6 @@ export interface IOrder {
   comment?: string | null;
   itemName: string;
   quantity: number;
-  items?: Item[] | null;
 }
 export interface CreateOrder {
   dueDate?: Date | null;
@@ -16,5 +14,4 @@ export interface CreateOrder {
   comment?: string | null;
   itemName: string;
   quantity: number;
-  items?: Item[];
 }
