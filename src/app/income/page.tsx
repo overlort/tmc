@@ -4,7 +4,7 @@ import { CreateIncomeModal } from "@/feature/income/createIncome";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export default function IncomesPage() {
+const IncomesPage = () => {
   const [isOpenCreation, setIsOpenCreation] = useState(false);
 
   return (
@@ -17,3 +17,5 @@ export default function IncomesPage() {
     </div>
   )
 }
+
+export default IncomesPage;

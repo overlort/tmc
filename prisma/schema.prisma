@@ -7,40 +7,61 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Order {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  dueDate   DateTime?
-  initiator String
-  comment   String?
-  itemName  String
-  quantity  Int
-}
-
 model Category {
-  id       String     @id @default(cuid())
-  name     String
-  icon     String? // название иконки из lucide (например "Wrench", "Box" и т.д.)
-  parentId String?
-  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
-  children Category[] @relation("CategoryToCategory")
-  items    Item[] // связь с товарами
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int          @id @default(autoincrement())
+  name        String
+  icon        String?
+  parentId    Int?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  assets      Asset[]
+  parent      Category?    @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children    Category[]   @relation("CategoryToCategory")
+  consumables Consumable[]
 }
 
-model Item {
+model Asset {
+  id              Int         @id @default(autoincrement())
+  name            String
+  photoUrl        String?
+  inventoryNumber String
+  article         String
+  brand           String
+  location        String
+  owner           String
+  status          AssetStatus @default(IN_STOCK)
+  price           Int
+  comment         String?
+  categoryId      Int?
+  lastModified    DateTime    @updatedAt
+  category        Category?   @relation(fields: [categoryId], references: [id])
+}
+
+model Consumable {
   id              Int       @id @default(autoincrement())
   name            String
   photoUrl        String?
-  inventoryNumber String?
-  quantity        Int
+  inventoryNumber String
+  article         String
+  brand           String
+  location        String
+  quantityUnit    Unit      @default(PCS)
+  quantity        Decimal
+  price           Int
+  comment         String?
+  categoryId      Int?
   category        Category? @relation(fields: [categoryId], references: [id])
-  categoryId      String?
+  expenses        Expense[]
+}
 
-  income   Income? @relation(fields: [incomeId], references: [id])
-  incomeId Int?
+model Expense {
+  id           Int        @id @default(autoincrement())
+  consumableId Int
+  quantity     Decimal
+  date         DateTime   @default(now())
+  receiver     String
+  comment      String?
+  consumable   Consumable @relation(fields: [consumableId], references: [id])
 }
 
 model Income {
@@ -52,5 +73,21 @@ model Income {
   seller       String
   buyer        String
   photoUrl     String
-  items        Item[]
+}
+
+enum AssetStatus {
+  IN_STOCK
+  DISPOSED
+}
+
+enum Unit {
+  PCS //шт
+  BOX //коробка
+  PACK //комплект
+  L //литр
+  ML //милилитр
+  KG //кг
+  G //г
+  M //метр
+  CM //сантиметр
 }

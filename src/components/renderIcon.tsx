@@ -26,7 +26,7 @@ interface RenderIconProps {
   className?: string;
 }
 
-export function RenderIcon({ name, className }: RenderIconProps): JSX.Element {
+export const RenderIcon = ({ name, className }: RenderIconProps): JSX.Element => {
   switch (name) {
     case "wrench":
       return <Wrench className={className} />;

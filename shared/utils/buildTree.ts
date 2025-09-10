@@ -1,6 +1,6 @@
 import { CategoryNode, ICategory } from "@/entities/category/model/category.types";
 
-export function buildTree(rows: ICategory []) {
+export const buildTree = (rows: ICategory []) => {
   const map = new Map<string, CategoryNode>();
   rows.forEach((r) => map.set(r.id, { ...r, children: [] }));
 

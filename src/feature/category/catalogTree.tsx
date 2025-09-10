@@ -30,20 +30,13 @@ type CategoryNode = {
   children?: CategoryNode[];
 };
 
-export default function CatalogTree({
-  selectedCategoryId,
-  onSelectAction,
-  className,
-}: {
-  selectedCategoryId?: string | null;
-  onSelectAction: (id: string | null) => void;
-  className?: string;
-}) {
+const CatalogTree = () => {
   const [tree, setTree] = useState<CategoryNode[]>([]);
   const [loading, setLoading] = useState(false);
   const [folderSearch, setFolderSearch] = useState("");
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -83,7 +76,7 @@ export default function CatalogTree({
     if (!confirm("Удалить папку и все вложенные?")) return;
     try {
       await deleteCategory(id)
-      if (selectedCategoryId === id) onSelectAction(null);
+      if (selectedCategoryId === id) console.log(null);
       await load();
     } catch (err) {
       console.error(err);
@@ -148,7 +141,7 @@ export default function CatalogTree({
                 isSelected ? "bg-blue-100" : "hover:bg-gray-100"
               }`}
               style={{ paddingLeft: depth * 12 + 8 }}
-              onClick={() => onSelectAction(node.id)}
+              onClick={() => console.log(node.id)}
             >
               {/* Шеврон */}
               <button
@@ -257,7 +250,7 @@ export default function CatalogTree({
 
 
   return (
-    <aside className={className}>
+    <aside className="w-64 h-full border-r pr-4">
       <div className="flex items-center gap-2 mb-3">
         <Input
           value={folderSearch}
@@ -284,3 +277,5 @@ export default function CatalogTree({
     </aside>
   );
 }
+
+export default CatalogTree;

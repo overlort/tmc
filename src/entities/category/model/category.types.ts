@@ -1,4 +1,5 @@
-import { IItem } from "@/entities/item/model/item.types";
+import { IAsset } from "@/entities/asset/model/asset.types";
+import { IConsumable } from "@/entities/consumable/model/consumable.types";
 
 export type ICategory  = {
   id: string;
@@ -10,7 +11,8 @@ export type ICategory  = {
 };
 
 export interface ICategoryWithItems extends ICategory {
-  items: IItem[];
+  asset: IAsset[];
+  consumable: IConsumable[];
 }
 
 export interface CreateCategory {

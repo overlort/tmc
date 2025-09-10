@@ -1,10 +1,8 @@
 "use client";
 
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { createItem } from "@/entities/item/model/item.action";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,9 +14,9 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { CreateItem } from "@/entities/item/model/item.types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { createAsset } from "@/entities/asset/model/asset.action";
 
 interface CreateItemDrawerProps {
   isOpen: boolean;
@@ -26,35 +24,58 @@ interface CreateItemDrawerProps {
   onCreation: () => void;
 }
 
-export const CreateItemDrawer = ({ onCreation, isOpen, onClose }: CreateItemDrawerProps) => {
+export const CreateItemModal = ({ onCreation, isOpen, onClose }: CreateItemDrawerProps) => {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const createItemSchema = z.object({
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  const createAssetSchema = z.object({
     name: z.string().min(1, "Введите название"),
-    photoUrl: z.string().optional(),
+    photoUrl: z.string().optional().or(z.literal("")),
     inventoryNumber: z.string().min(1, "Введите инвентарный номер"),
-    quantity: z.number(),
+    article: z.string().min(1, "Введите артикул"),
+    brand: z.string().min(1, "Введите бренд"),
+    location: z.string().min(1, "Введите местоположение"),
+    owner: z.string().min(1, "Введите владельца"),
+    price: z.number().int().nonnegative(),
+    comment: z.string().optional().or(z.literal("")),
   });
 
-  type CreateItemSchema = z.infer<typeof createItemSchema>;
+  type CreateAssetSchema = z.input<typeof createAssetSchema>;
 
-  const form = useForm<CreateItemSchema>({
-    resolver: zodResolver(createItemSchema),
+  const form = useForm<CreateAssetSchema>({
+    resolver: zodResolver(createAssetSchema),
     defaultValues: {
       name: "",
       photoUrl: "",
       inventoryNumber: "",
-      quantity: 0,
+      article: "",
+      brand: "",
+      location: "",
+      owner: "",
+      price: 0,
+      comment: "",
     },
   });
 
-  const handleCreateItem = async (data: CreateItem) => {
+  const handleCreateItem = async (data: CreateAssetSchema) => {
     try {
-      await createItem(data);
+      const payload = {
+        ...data,
+        photoUrl: data.photoUrl || undefined,
+        comment: data.comment || undefined,
+        status: "IN_STOCK" as const,
+      };
+      await createAsset(payload);
       form.reset();
-      setPreviewUrl(null); // сбрасываем превью
+      setPreviewUrl(null);
       onCreation();
+      onClose();
       toast("✅ Успешно создано");
     } catch (err) {
       console.error(err);
@@ -96,19 +117,28 @@ export const CreateItemDrawer = ({ onCreation, isOpen, onClose }: CreateItemDraw
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()} direction="right">
-      <DrawerContent className="p-4 w-full sm:w-1/3">
-        <DrawerHeader>
-          <div className="flex justify-between items-center">
-            <DrawerTitle>Создать новый товар</DrawerTitle>
-            <DrawerClose />
-          </div>
-        </DrawerHeader>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-xl w-full max-w-2xl p-6 shadow-lg relative max-h-[90vh] overflow-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+        >
+          ✕
+        </button>
+
+        <h2 className="text-xl font-bold mb-4">Создать актив</h2>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleCreateItem)} className="space-y-6">
-            {/* Название */}
+          <form onSubmit={form.handleSubmit(handleCreateItem)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
@@ -116,23 +146,22 @@ export const CreateItemDrawer = ({ onCreation, isOpen, onClose }: CreateItemDraw
                 <FormItem>
                   <FormLabel>Название</FormLabel>
                   <FormControl>
-                    <Input placeholder="Введите название" {...field} />
+                    <Input placeholder="Введите название" autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Фото */}
             <FormField
               control={form.control}
               name="photoUrl"
               render={() => (
                 <FormItem>
-                  <FormLabel>Фото товара</FormLabel>
+                  <FormLabel>Фото</FormLabel>
                   <FormControl>
                     <div>
-                      <Input type="file" accept="image/*" onChange={handleFileChange} />
+                      <Input type="file" accept="image/*" autoComplete="off" onChange={handleFileChange} />
                       {previewUrl && (
                         <div className="mt-2 w-full h-48 relative border border-gray-200">
                           <Image src={previewUrl} alt="Preview" fill style={{ objectFit: "cover" }} />
@@ -146,7 +175,6 @@ export const CreateItemDrawer = ({ onCreation, isOpen, onClose }: CreateItemDraw
               )}
             />
 
-            {/* Инвентарный номер */}
             <FormField
               control={form.control}
               name="inventoryNumber"
@@ -154,34 +182,104 @@ export const CreateItemDrawer = ({ onCreation, isOpen, onClose }: CreateItemDraw
                 <FormItem>
                   <FormLabel>Инвентарный номер</FormLabel>
                   <FormControl>
-                    <Input placeholder="12345" {...field} />
+                    <Input placeholder="12345" autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Количество */}
-            <FormField
-              control={form.control}
-              name="quantity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Количество</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="article"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Артикул</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Введите артикул" autoComplete="off" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="brand"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Бренд</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Введите бренд" autoComplete="off" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Местоположение</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Склад A" autoComplete="off" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="owner"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Владелец</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Отдел" autoComplete="off" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="comment"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Комментарий</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Примечание" autoComplete="off" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Цена</FormLabel>
+                    <FormControl>
+                      <Input type="number" autoComplete="off" {...field} onChange={(e) => field.onChange(e.target.valueAsNumber)} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <Button type="submit" disabled={uploading}>
-              {uploading ? "Загрузка..." : "Создать предмет"}
+              {uploading ? "Загрузка..." : "Создать актив"}
             </Button>
           </form>
         </Form>
-      </DrawerContent>
-    </Drawer>
+      </div>
+    </div>
   );
 };

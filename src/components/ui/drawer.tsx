@@ -95,7 +95,7 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function DrawerTitle({
+function DrawerTitle ({
   className,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Title>) {

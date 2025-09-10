@@ -1,5 +1,3 @@
-import { ItemForm } from "@/entities/item/model/item.types";
-
 export interface IIncome {
   id: number;
   createdAt: Date;
@@ -8,6 +6,7 @@ export interface IIncome {
   incomeDate: Date;
   seller: string;
   buyer: string;
+  photoUrl: string;
 }
 
 export interface CreateIncome {
@@ -17,14 +16,4 @@ export interface CreateIncome {
   photoUrl: string;
   seller: string;
   buyer: string;
-}
-
-export interface CreateIncomeForm {
-  creatorName: string;
-  incomeNumber: string;
-  incomeDate: string;
-  seller: string;
-  photoUrl: string;
-  buyer: string;
-  items: ItemForm[];
 }

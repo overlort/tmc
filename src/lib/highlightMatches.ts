@@ -1,4 +1,4 @@
-export function hM(value: string | number, search: string | number): string {
+export const hM = (value: string | number, search: string | number): string => {
   if (!search) return String(value);
 
   const valueStr = String(value);
