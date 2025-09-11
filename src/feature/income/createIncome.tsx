@@ -1,6 +1,6 @@
 "use client";
 
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -12,13 +12,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import { Loader2Icon, PlusCircle } from "lucide-react";
-import { ItemFields } from "@/feature/income/itemFields";
+import { Loader2Icon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import React, { useEffect, useState } from "react";
-import { CreateIncomeForm } from "@/entities/income/model/income.type";
+import { CreateIncome } from "@/entities/income/model/income.type";
 import Image from "next/image";
-import { createIncomeWithItems } from "@/entities/income/model/income.action";
+import { createIncome } from "@/entities/income/model/income.action";
+import { useRouter } from "next/navigation";
 
 interface CreateIncomeModalProps {
   isOpen: boolean;
@@ -27,6 +27,7 @@ interface CreateIncomeModalProps {
 }
 
 export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeModalProps) => {
+  const router = useRouter();
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false)
@@ -48,15 +49,16 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
     seller: z.string().min(1, "Введите продавца"),
     buyer: z.string().min(1, "Введите покупателя"),
     photoUrl: z.string(),
-    items: z.array(
-      z.object({
-        name: z.string().min(1),
-        quantity: z.number().min(1),
-        price: z.number().min(0),
-        code: z.string().min(1),
-      })
-    ),
   });
+
+  type CreateIncomeForm = {
+    creatorName: string;
+    incomeNumber: string;
+    incomeDate: string;
+    photoUrl: string;
+    seller: string;
+    buyer: string;
+  };
 
   const form = useForm<CreateIncomeForm>({
     resolver: zodResolver(createIncomeSchema),
@@ -67,7 +69,6 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
       photoUrl: "",
       seller: "",
       buyer: "",
-      items: [],
     },
   });
 
@@ -105,27 +106,19 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
     }
   };
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "items",
-  });
-
-  const watch = form.watch;
-  const items = watch("items") || [];
-  const totalDoc = items.reduce(
-    (acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0),
-    0
-  );
-
   const handleCreateIncome = async (data: CreateIncomeForm) => {
-    if (data.items.length === 0) {
-      throw new Error("Нельзя создать коробку без вещей");
-    }
     try {
       setLoading(true)
-      console.log(1211113)
-      console.log("Создаём счёт:", data);
-      await createIncomeWithItems(data);
+      const payload: CreateIncome = {
+        creatorName: data.creatorName,
+        incomeNumber: data.incomeNumber,
+        incomeDate: new Date(data.incomeDate),
+        photoUrl: data.photoUrl,
+        seller: data.seller,
+        buyer: data.buyer,
+      };
+
+      const created = await createIncome(payload);
 
       toast("✅ Счёт успешно создан");
 
@@ -133,6 +126,9 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
       setPreviewUrl(null);
       onClose()
       if (onCreation) onCreation();
+      if (created?.id) {
+        router.push(`/income/${created.id}`);
+      }
     } catch (err) {
       console.error(err);
       toast("❌ Ошибка при создании счёта");
@@ -239,12 +235,12 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
               name="photoUrl"
               render={() => (
                 <FormItem>
-                  <FormLabel>Фото товара</FormLabel>
+                  <FormLabel>Скан счета</FormLabel>
                   <FormControl>
                     <div>
                       <Input type="file" accept="image/*" onChange={handleFileChange} />
                       {previewUrl && (
-                        <div className="mt-2 w-full h-48 relative border border-gray-200">
+                        <div className="mt-2 w-48 h-48 relative border border-gray-200">
                           <Image src={previewUrl} alt="Preview" fill style={{ objectFit: "cover" }} />
                         </div>
                       )}
@@ -256,41 +252,7 @@ export const CreateIncomeModal = ({ isOpen, onClose, onCreation }: CreateIncomeM
               )}
             />
 
-            {/* Зона товаров */}
-            <div className="border border-gray-300 rounded p-4 mt-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold">Товары</h3>
-              </div>
-
-              {fields.map((field, index) => (
-                <ItemFields
-                  key={field.id}
-                  control={form.control}
-                  index={index}
-                  remove={remove}
-                  watch={watch}
-                />
-              ))}
-
-              {/* Сумма документа */}
-              <div className="flex justify-between border-t">
-                <button
-                  type="button"
-                  onClick={() =>
-                    append({ name: "", quantity: 1, price: 0, code: "" })
-                  }
-                  className="flex items-center text-blue-600 hover:text-blue-800"
-                >
-                  <PlusCircle size={20} className="mr-1" /> Добавить товар
-                </button>
-
-                <div className="mt-4 p-3  text-right font-semibold">
-                  Сумма документа: {totalDoc.toFixed(2)}
-                </div>
-              </div>
-
-
-            </div>
+            {/* Товары будут добавляться позже к income */}
 
             {!loading ? (
               <button type="submit" className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">

@@ -35,6 +35,7 @@ model Asset {
   categoryId      Int?
   lastModified    DateTime    @updatedAt
   category        Category?   @relation(fields: [categoryId], references: [id])
+  incomes         Income[]
 }
 
 model Consumable {
@@ -52,6 +53,7 @@ model Consumable {
   categoryId      Int?
   category        Category? @relation(fields: [categoryId], references: [id])
   expenses        Expense[]
+  incomes         Income[]
 }
 
 model Expense {
@@ -73,6 +75,11 @@ model Income {
   seller       String
   buyer        String
   photoUrl     String
+  assetId      Int?
+  consumableId Int?
+
+  asset        Asset?     @relation(fields: [assetId], references: [id])
+  consumable   Consumable? @relation(fields: [consumableId], references: [id])
 }
 
 enum AssetStatus {

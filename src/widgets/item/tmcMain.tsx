@@ -3,10 +3,10 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import ListOfItems from "@/feature/item/listOfItems";
+import ListOfAssets from "@/feature/asset/listOfAssets";
 import { IItem } from "@/entities/item/model/item.types";
 import { getAllItems } from "@/entities/item/model/item.action";
-import { CreateItemModal } from "@/feature/item/createItem";
+import { CreateAssetModal } from "@/feature/asset/createAsset";
 import CatalogTree from "@/feature/category/catalogTree";
 
 const TmcMain = () => {

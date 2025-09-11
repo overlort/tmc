@@ -11,20 +11,7 @@ interface ListOfItemsProps {
   items: IAsset[];
 }
 
-const ListOfItems = ({items, search }: ListOfItemsProps) => {
-
-  // const getStatusBadge = (status: IItem["status"]) => {
-  //   switch (status) {
-  //     case "IN_STOCK":
-  //       return <Badge variant="outline" color="green">На складе</Badge>;
-  //     case "ISSUED":
-  //       return <Badge variant="outline" color="blue">Выдан</Badge>;
-  //     case "NOT_AVAILABLE":
-  //       return <Badge variant="outline" color="red">Нет в наличии</Badge>;
-  //     default:
-  //       return null;
-  //   }
-  // };
+const ListOfAssets = ({items, search }: ListOfItemsProps) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -61,4 +48,4 @@ const ListOfItems = ({items, search }: ListOfItemsProps) => {
   );
 }
 
-export default ListOfItems;
+export default ListOfAssets;

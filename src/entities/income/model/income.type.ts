@@ -7,6 +7,8 @@ export interface IIncome {
   seller: string;
   buyer: string;
   photoUrl: string;
+  assetId?: number | null;
+  consumableId?: number | null;
 }
 
 export interface CreateIncome {

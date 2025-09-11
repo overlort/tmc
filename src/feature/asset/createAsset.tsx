@@ -24,7 +24,7 @@ interface CreateItemDrawerProps {
   onCreation: () => void;
 }
 
-export const CreateItemModal = ({ onCreation, isOpen, onClose }: CreateItemDrawerProps) => {
+export const CreateAssetModal = ({ onCreation, isOpen, onClose }: CreateItemDrawerProps) => {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 

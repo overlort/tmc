@@ -3,8 +3,8 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import ListOfItems from "@/feature/item/listOfItems";
-import { CreateItemModal } from "@/feature/item/createItem";
+import ListOfAssets from "@/feature/asset/listOfAssets";
+import { CreateAssetModal } from "@/feature/asset/createAsset";
 import { IAsset } from "@/entities/asset/model/asset.types";
 import { getAllAssets } from "@/entities/asset/model/asset.action";
 
@@ -63,7 +63,7 @@ const AssetPage = () => {
           className="grid gap-4"
           style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}
         >
-          <ListOfItems items={filteredItems} search={search} />
+          <ListOfAssets items={filteredItems} search={search} />
         </div>
       ) : (
         <div className="text-center py-8">
@@ -74,7 +74,7 @@ const AssetPage = () => {
         </div>
       )}
 
-      <CreateItemModal onCreation={onCreationItem} isOpen={isOpenItem} onClose={() => setIsOpenItem(false)} />
+      <CreateAssetModal onCreation={onCreationItem} isOpen={isOpenItem} onClose={() => setIsOpenItem(false)} />
     </div>
   );
 }
