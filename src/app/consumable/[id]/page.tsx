@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,10 +11,11 @@ import type { ICategory } from "@/entities/category/model/category.types";
 import { useRouter } from "next/navigation";
 import { IssueConsumableModal } from "@/feature/consumable/issueConsumable";
 
-interface PageProps { params: { id: string } }
+interface PageProps { params: Promise<{ id: string }> }
 
 const ConsumableDetailsPage = ({ params }: PageProps) => {
-  const id = Number(params.id);
+  const { id: idString } = use(params);
+  const id = Number(idString);
   const [consumable, setConsumable] = useState<IConsumable | null>(null);
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [issueOpen, setIssueOpen] = useState(false);

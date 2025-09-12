@@ -18,7 +18,7 @@ export const getAllIncomes = async (): Promise<IIncome[]> =>
 // UPDATE
 export const updateIncome = async (
   id: number,
-  data: Partial<Omit<IIncome, "id" | "createdAt">>
+  data: CreateIncome
 ): Promise<IIncome> =>
   await prisma.income.update({ where: { id }, data });
 

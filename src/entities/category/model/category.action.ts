@@ -27,7 +27,7 @@ export const getAllCategories = async (): Promise<ICategory[]> =>
 
 // UPDATE
 export const updateCategory = async (
-  id: string,
+  id: number,
   data: CreateCategory
 ): Promise<ICategory> => {
   const { name, parentId, icon } = data;
@@ -41,14 +41,15 @@ export const updateCategory = async (
   return prisma.category.update({ where: { id }, data: updateData });
 }
 // DELETE
-export const deleteCategory = async (id: string) => {
+export const deleteCategory = async (id: number) => {
   try {
     // удаляем рекурсивно
-    const deleteRecursive = async (categoryId: string) => {
+    const deleteRecursive = async (categoryId: number) => {
       const children = await prisma.category.findMany({ where: { parentId: categoryId } });
       for (const c of children) await deleteRecursive(c.id);
 
-      await prisma.item.updateMany({ where: { categoryId }, data: { categoryId: null } }); // отвязываем товары
+      await prisma.asset.updateMany({ where: { categoryId }, data: { categoryId: null } }); // отвязываем товары
+      await prisma.consumable.updateMany({ where: { categoryId }, data: { categoryId: null } }); // отвязываем товары
       await prisma.category.delete({ where: { id: categoryId } });
     };
 

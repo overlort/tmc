@@ -1,3 +1,6 @@
+import { IAsset } from "@/entities/asset/model/asset.types";
+import { IConsumable } from "@/entities/consumable/model/consumable.types";
+
 export interface IIncome {
   id: number;
   createdAt: Date;
@@ -9,6 +12,8 @@ export interface IIncome {
   photoUrl: string;
   assetId?: number | null;
   consumableId?: number | null;
+  asset?: IAsset[] | null;
+  consumable?: IConsumable[] | null;
 }
 
 export interface CreateIncome {

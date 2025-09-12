@@ -23,10 +23,10 @@ import {
 import { buildTree } from "../../../shared/utils/buildTree";
 
 type CategoryNode = {
-  id: string;
+  id: number;
   name: string;
   icon?: string | null;
-  parentId?: string | null;
+  parentId?: number | null;
   children?: CategoryNode[];
 };
 
@@ -34,9 +34,9 @@ const CatalogTree = () => {
   const [tree, setTree] = useState<CategoryNode[]>([]);
   const [loading, setLoading] = useState(false);
   const [folderSearch, setFolderSearch] = useState("");
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -65,14 +65,14 @@ const CatalogTree = () => {
     }
   };
 
-  const createCat = async (parentId?: string | null) => {
+  const createCat = async (parentId?: number | null) => {
     const newCat = await createCategory({ name: "Новая папка", parentId: parentId || null, icon: "folder" })
     await load();
     setRenamingId(newCat.id);
     if (parentId) setExpanded((s) => ({ ...s, [parentId]: true }));
   };
 
-  const deleteCat = async (id: string) => {
+  const deleteCat = async (id: number) => {
     if (!confirm("Удалить папку и все вложенные?")) return;
     try {
       await deleteCategory(id)
@@ -83,7 +83,7 @@ const CatalogTree = () => {
     }
   };
 
-  const toggle = (id: string) => setExpanded((s) => ({ ...s, [id]: !s[id] }));
+  const toggle = (id: number) => setExpanded((s) => ({ ...s, [id]: !s[id] }));
 
   const filterTree = useCallback((nodes: CategoryNode[], q: string): CategoryNode[] => {
     if (!q) return nodes;

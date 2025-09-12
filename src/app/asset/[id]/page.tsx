@@ -11,14 +11,17 @@ import { ConfirmDisposeButton } from "@/feature/asset/confirmDispose";
 import { useEffect, useState } from "react";
 import type { IAsset } from "@/entities/asset/model/asset.types";
 import type { ICategory } from "@/entities/category/model/category.types";
+import { use } from 'react';
+
 
 interface AssetPageProps {
-  params: { id: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  params: Promise<{ id: string }>;
+  // searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-const AssetDetailsPage = ({ params, searchParams }: AssetPageProps) => {
-  const id = Number(params.id);
+const AssetDetailsPage = ({ params }: AssetPageProps) => {
+  const { id: idString } = use(params);
+  const id = Number(idString);
   const [moveModalOpen, setMoveModalOpen] = useState(false)
   const [asset, setAsset] = useState<IAsset | null>(null);
   const [categories, setCategories] = useState<ICategory[]>([]);

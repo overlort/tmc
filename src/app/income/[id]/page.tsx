@@ -4,13 +4,15 @@ import { DeleteIncomeButton } from "@/feature/income/ui/DeleteIncomeButton";
 import { EditIncomeButton } from "@/feature/income/ui/EditIncomeButton";
 import { AddAssetToIncome } from "@/feature/income/ui/AddAssetToIncome";
 import Image from "next/image";
+import { use } from "react";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 const IncomeDetailsPage = async ({ params }: PageProps) => {
-  const id = Number(params.id);
+  const { id: idString } = await params;
+  const id = Number(idString);
   if (Number.isNaN(id)) return notFound();
 
   const income = await getIncomeById(id);
